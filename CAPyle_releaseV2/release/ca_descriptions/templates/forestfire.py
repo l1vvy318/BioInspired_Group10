@@ -85,8 +85,8 @@ def transition_function(grid, neighbourstates, neighbourcounts):
 
 
     # how long it burns
-    # canyon: 1/5 = 0.2
-    burnout_canyon = (grid == 5) & (roll < 0.2)
+    # canyon: 1/12 = 0.0833
+    burnout_canyon = (grid == 5) & (roll < 0.0833)
     
     # chaparral: 1/120 approx 0.0083
     burnout_chaparral = (grid == 6) & (roll < 0.0083)
@@ -133,7 +133,7 @@ def main():
     """ Main function that sets up, runs and saves CA"""
     config = setup(sys.argv[1:])
     grid = Grid2D(config, transition_function)
-    grid.grid = generate_initial_grid(config.grid_dims)
+    #grid.grid = generate_initial_grid(config.grid_dims)
     timeline = grid.run()
     config.save()
     utils.save(timeline, config.timeline_path)
