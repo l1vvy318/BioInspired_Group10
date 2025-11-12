@@ -37,7 +37,8 @@ def setup(args):
     # 5: burning canyon 
     # 6: burning chaparral 
     # 7: burning forest 
-    config.states = (0, 1, 2, 3, 4, 5, 6, 7)
+    # 8: town
+    config.states = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     
     # colours
     config.state_colors = [
@@ -48,7 +49,10 @@ def setup(args):
         (0, 0.4, 1),     # 4: water (blue)
         (1, 0.2, 0),     # 5: burning canyon (bright red)
         (0.8, 0, 0),     # 6: burning chaparral (darker red)
-        (0.5, 0, 0)      # 7: burning forest (dark red)
+        (0.5, 0, 0),     # 7: burning forest (dark red)
+        (0, 0, 0),       # 8: town (black)
+        (0, 0, 1),
+        (0, 1, 0)
     ]
     
     # grid dimensions
@@ -109,6 +113,14 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     return grid
 
 def generate_initial_grid(grid_dims):
+
+    #power plant
+    #grid[0, 10] = 9
+
+    #proposed incinerator
+    #grid[0, 100] = 10
+
+
     # background colour chaparral
     grid = np.full(grid_dims, 2, dtype=int)
     # grid [y, x] with y top = 0 and y bottom = 100
@@ -127,6 +139,9 @@ def generate_initial_grid(grid_dims):
 
     # fire
     grid[9, 10] = 6
+    
+    #town
+    grid[88:93, 27:32] = 8
     return grid
 
 def main():
