@@ -54,16 +54,45 @@ def setup(args):
         (0, 0, 1),
         (0, 1, 0)
     ]
-    
-    # grid dimensions
-    # 100 x 100 represents the 50km x 50km area with 0.5km per square km
-    config.grid_dims = (100, 100)
+
+    generate_initial_grid(config)
 
     # ----------------------------------------------------------------------
 
     if len(args) == 2:
         config.save()
         sys.exit()
+    return config
+
+def generate_initial_grid(config):
+
+    #power plant
+    #grid[0, 10] = 9
+
+    #proposed incinerator
+    #grid[0, 100] = 10
+
+   # grid dimensions
+    # 100 x 100 represents the 50km x 50km area with 0.5km per square km
+    config.grid_dims = (100, 100)
+
+    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) 
+    config.initial_grid[10:70, 10:25] = 3 # main left part
+    config.initial_grid[10:15, 25:40] = 3 # small top rectangle
+    config.initial_grid[50:70, 25:50] = 3 # bottom rectangle
+
+    # canyon
+    config.initial_grid[20:65, 70:75] = 1
+
+    # lakes
+    config.initial_grid[20:40, 35:40] = 4 # vertical lake
+    config.initial_grid[80:85, 50:80] = 4 # horizontal lake
+
+    # fire
+    config.initial_grid[5, 5] = 6
+    
+    #town
+    config.initial_grid[88:93, 27:32] = 8
     return config
 
 
@@ -110,38 +139,6 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     grid[burnout_chaparral] = 0
     grid[burnout_forest] = 0
 
-    return grid
-
-def generate_initial_grid(grid_dims):
-
-    #power plant
-    #grid[0, 10] = 9
-
-    #proposed incinerator
-    #grid[0, 100] = 10
-
-
-    # background colour chaparral
-    grid = np.full(grid_dims, 2, dtype=int)
-    # grid [y, x] with y top = 0 and y bottom = 100
-
-    # dense forest
-    grid[10:70, 10:25] = 3
-    grid[10:15, 25:40] = 3 # small top rectangle
-    grid[50:70, 25:50] = 3 # bottom rectangle
-
-    # canyon
-    grid[20:65, 70:75] = 1
-
-    # lakes
-    grid[20:40, 35:40] = 4 # vertical lake
-    grid[80:85, 50:80] = 4 # horizontal lake
-
-    # fire
-    grid[9, 10] = 6
-    
-    #town
-    grid[88:93, 27:32] = 8
     return grid
 
 def main():
