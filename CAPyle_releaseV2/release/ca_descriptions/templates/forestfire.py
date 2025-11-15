@@ -38,21 +38,23 @@ def setup(args):
     # 6: burning chaparral 
     # 7: burning forest 
     # 8: town
+    # 9: power plant
+    # 10: incinerator
     config.states = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     
     # colours
     config.state_colors = [
         (0.4, 0.4, 0.4), # 0: ash (dark grey)
         (1, 1, 0),       # 1: canyon (yellow)
-        (1, 0.6, 0),     # 2: chaparral (orange)
+        (0.6, 0.6, 0.3), # 2: chaparral (olive green)
         (0, 0.4, 0),     # 3: forest (dark green)
         (0, 0.4, 1),     # 4: water (blue)
         (1, 0.2, 0),     # 5: burning canyon (bright red)
         (0.8, 0, 0),     # 6: burning chaparral (darker red)
         (0.5, 0, 0),     # 7: burning forest (dark red)
         (0, 0, 0),       # 8: town (black)
-        (0, 0, 1),
-        (0, 1, 0)
+        (0, 0, 0),       # 9: power plant (black)
+        (0, 0, 0)        # 10: incinerator (black)
     ]
 
     generate_initial_grid(config)
@@ -66,17 +68,13 @@ def setup(args):
 
 def generate_initial_grid(config):
 
-    #power plant
-    #grid[0, 10] = 9
-
-    #proposed incinerator
-    #grid[0, 100] = 10
-
    # grid dimensions
     # 100 x 100 represents the 50km x 50km area with 0.5km per square km
     config.grid_dims = (100, 100)
 
-    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) 
+    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) # chapparel
+
+    # dense forest
     config.initial_grid[10:70, 10:25] = 3 # main left part
     config.initial_grid[10:15, 25:40] = 3 # small top rectangle
     config.initial_grid[50:70, 25:50] = 3 # bottom rectangle
@@ -89,10 +87,23 @@ def generate_initial_grid(config):
     config.initial_grid[80:85, 50:80] = 4 # horizontal lake
 
     # fire
-    config.initial_grid[5, 5] = 6
+    # config.initial_grid[5, 5] = 6
     
-    #town
+    # town
     config.initial_grid[88:93, 27:32] = 8
+
+    # power plant
+    config.initial_grid[0, 10] = 9
+
+    # proposed incinerator
+    config.initial_grid[0, 99] = 10
+
+    # start the fire at the power plant
+    config.initial_grid[0, 10] = 6
+
+    # start the fire at the incinerator
+    config.initial_grid[0, 99] = 6
+
     return config
 
 
