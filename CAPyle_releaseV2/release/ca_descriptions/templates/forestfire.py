@@ -44,17 +44,17 @@ def setup(args):
     
     # colours
     config.state_colors = [
-        (0.4, 0.4, 0.4), # 0: ash (dark grey)
-        (1, 1, 0),       # 1: canyon (yellow)
-        (0.6, 0.6, 0.3), # 2: chaparral (olive green)
-        (0, 0.4, 0),     # 3: forest (dark green)
-        (0, 0.4, 1),     # 4: water (blue)
-        (1, 0.2, 0),     # 5: burning canyon (bright red)
-        (0.8, 0, 0),     # 6: burning chaparral (darker red)
-        (0.5, 0, 0),     # 7: burning forest (dark red)
-        (0, 0, 0),       # 8: town (black)
-        (0, 0, 0),       # 9: power plant (black)
-        (0, 0, 0)        # 10: incinerator (black)
+        (0.4, 0.4, 0.4),   # 0: ash (dark grey)
+        (1, 1, 0),         # 1: canyon (yellow)
+        (0.6, 0.65, 0.19), # 2: chaparral (olive green)
+        (0.27, 0.29, 0.2), # 3: forest (dark green)
+        (0.2, 0.7, 0.9),   # 4: water (blue)
+        (0.75, 0, 0),      # 5: burning canyon (crimson red)
+        (0.86, 0.08, 0.23),# 6: burning chaparral (apple red)
+        (0.44, 0.18, 0.22),# 7: burning forest (dark red)
+        (0, 0, 0),         # 8: town (black)
+        (0, 0, 0),         # 9: power plant (black)
+        (0, 0, 0)          # 10: incinerator (black)
     ]
 
     generate_initial_grid(config)
@@ -127,16 +127,15 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     # forest: 10% chance
     ignite_forest = (grid == 3) & has_burning_neighbour & (roll < 0.1)
 
-
     # how long it burns
     # canyon: 1/12 = 0.0833
-    burnout_canyon = (grid == 5) & (roll < 0.0833)
+    canyon_burn_duration = (grid == 5) & (roll < 0.0833)
     
     # chaparral: 1/120 approx 0.0083
-    burnout_chaparral = (grid == 6) & (roll < 0.0083)
+    chaparral_burn_duration = (grid == 6) & (roll < 0.0083)
     
     # forest: 1/720 approx 0.0014
-    burnout_forest = (grid == 7) & (roll < 0.0014)
+    forest_burn_duration = (grid == 7) & (roll < 0.0014)
 
 
     # grid updates
@@ -146,9 +145,9 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     grid[ignite_forest] = 7
     
     # from burning to burn out
-    grid[burnout_canyon] = 0
-    grid[burnout_chaparral] = 0
-    grid[burnout_forest] = 0
+    grid[canyon_burn_duration] = 0
+    grid[chaparral_burn_duration] = 0
+    grid[forest_burn_duration] = 0
 
     return grid
 
