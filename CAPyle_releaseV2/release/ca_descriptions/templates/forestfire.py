@@ -72,7 +72,7 @@ def generate_initial_grid(config):
     # 100 x 100 represents the 50km x 50km area with 0.5km per square km
     config.grid_dims = (100, 100)
 
-    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) # chapparel
+    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) # chaparral
 
     # dense forest
     config.initial_grid[10:70, 10:25] = 3 # main left part
@@ -85,9 +85,6 @@ def generate_initial_grid(config):
     # lakes
     config.initial_grid[20:40, 35:40] = 4 # vertical lake
     config.initial_grid[80:85, 50:80] = 4 # horizontal lake
-
-    # fire
-    # config.initial_grid[5, 5] = 6
     
     # town
     config.initial_grid[88:93, 27:32] = 8
@@ -102,7 +99,15 @@ def generate_initial_grid(config):
     config.initial_grid[0, 10] = 6
 
     # start the fire at the incinerator
-    config.initial_grid[0, 99] = 6
+    # config.initial_grid[0, 99] = 6
+
+    # extending the dense foreest: long term intervention
+    # config.initial_grid[81:87, 26:33] = 3
+    # config.initial_grid[81:93, 33:39] = 3
+    # config.initial_grid[81:93, 20:26] = 3
+
+    # dropping water aerially: short term intervention
+    # config.initial_grid[84:86, 15:40] = 4
 
     return config
 
@@ -136,7 +141,6 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     
     # forest: 1/720 approx 0.0014
     forest_burn_duration = (grid == 7) & (roll < 0.0014)
-
 
     # grid updates
     # form fuel to burning
