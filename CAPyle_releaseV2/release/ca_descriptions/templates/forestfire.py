@@ -107,7 +107,8 @@ def generate_initial_grid(config):
     # config.initial_grid[81:93, 20:26] = 3
 
     # dropping water aerially: short term intervention
-    # config.initial_grid[84:86, 15:40] = 4
+    # config.initial_grid[84:86, 15:40] = 4 # 2 x 25 strip of water (wide, thin)
+    # config.initial_grid[81:86, 24:34] = 4 # 5 x 10 strip of water (narrow, thick)
 
     return config
 
