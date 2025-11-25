@@ -15,8 +15,11 @@ sys.path.append(main_dir_loc + 'capyle/guicomponents')
 from capyle.ca import Grid2D, Neighbourhood, randomise2d
 import capyle.utils as utils
 import numpy as np
+global fuel
+fuel = None
 
 def setup(args):
+    global fuel 
     """Set up the config object used to interact with the GUI"""
     config_path = args[0]
     config = utils.load(config_path)
@@ -28,18 +31,6 @@ def setup(args):
     # this prevents fire from looping from the bottom to the top
     config.wrap = False
     
-    # state descriptions
-    # 0: ash
-    # 1: canyon (scrubland)
-    # 2: chaparral
-    # 3: dense forest
-    # 4: water
-    # 5: burning canyon 
-    # 6: burning chaparral 
-    # 7: burning forest 
-    # 8: town
-    # 9: power plant
-    # 10: incinerator
     config.states = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     
     # colours
@@ -57,44 +48,64 @@ def setup(args):
         (0, 0, 0)          # 10: incinerator (black)
     ]
 
-    generate_initial_grid(config)
-
+    config = generate_initial_grid(config)
+    fuel = create_fuel_grid(config)
     # ----------------------------------------------------------------------
 
     if len(args) == 2:
         config.save()
         sys.exit()
+
     return config
+
+def create_fuel_grid(config):
+    grid = config.initial_grid
+    fuel = np.zeros_like(grid, dtype=float)
+
+    # canyon
+    mask = (grid == 1)
+    fuel[mask] = np.clip(
+        np.random.normal(6, 1.2, np.sum(mask)),
+        1, 12
+    )
+
+    # chaparral
+    mask = (grid == 2)
+    fuel[mask] = np.clip(
+        np.random.normal(72, 14.4, np.sum(mask)),
+        24, 120
+    )
+
+    # forest
+    mask = (grid == 3)
+    fuel[mask] = np.clip(
+        np.random.normal(444, 88.8, np.sum(mask)),
+        168, 720
+    )
+
+    return fuel
 
 def generate_initial_grid(config):
 
-   # grid dimensions
     # 100 x 100 represents the 50km x 50km area with 0.5km per square km
     config.grid_dims = (100, 100)
-
-    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) # chaparral
-
+    # chaparral 
+    config.initial_grid = np.full(config.grid_dims, 2, dtype=int) 
     # dense forest
     config.initial_grid[10:70, 10:25] = 3 # main left part
     config.initial_grid[10:15, 25:40] = 3 # small top rectangle
     config.initial_grid[50:70, 25:50] = 3 # bottom rectangle
-
     # canyon
     config.initial_grid[20:65, 70:75] = 1
-
     # lakes
     config.initial_grid[20:40, 35:40] = 4 # vertical lake
     config.initial_grid[80:85, 50:80] = 4 # horizontal lake
-    
     # town
     config.initial_grid[88:93, 27:32] = 8
-
     # power plant
     config.initial_grid[0, 10] = 9
-
     # proposed incinerator
     config.initial_grid[0, 99] = 10
-
     # start the fire at the power plant
     config.initial_grid[0, 10] = 6
 
@@ -112,8 +123,8 @@ def generate_initial_grid(config):
 
     return config
 
-
 def transition_function(grid, neighbourstates, neighbourcounts):
+    global fuel
     """Function to apply the transition rules and return the new grid"""
     
     # generate random probability number
@@ -124,43 +135,44 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     has_burning_neighbour = burning_neighbour_count >= 1
     
     # ignition probabilities
-    # canyon: 90% chance
-    ignite_canyon = (grid == 1) & has_burning_neighbour & (roll < 0.9)
-    
-    # chaparral: 40% chance
-    ignite_chaparral = (grid == 2) & has_burning_neighbour & (roll < 0.4)
-    
-    # forest: 10% chance
-    ignite_forest = (grid == 3) & has_burning_neighbour & (roll < 0.1)
+    ignite_canyon = (grid == 1) & has_burning_neighbour & (roll < 0.9)  #canyon 90%
+    ignite_chaparral = (grid == 2) & has_burning_neighbour & (roll < 0.4)  #chaparral %40
+    ignite_forest = (grid == 3) & has_burning_neighbour & (roll < 0.1)  #forest %10
 
-    # how long it burns
-    # canyon: 1/12 = 0.0833
-    canyon_burn_duration = (grid == 5) & (roll < 0.0833)
-    
-    # chaparral: 1/120 approx 0.0083
-    chaparral_burn_duration = (grid == 6) & (roll < 0.0083)
-    
-    # forest: 1/720 approx 0.0014
-    forest_burn_duration = (grid == 7) & (roll < 0.0014)
-
-    # grid updates
-    # form fuel to burning
+    # Set on Fire
     grid[ignite_canyon] = 5
     grid[ignite_chaparral] = 6
     grid[ignite_forest] = 7
-    
-    # from burning to burn out
-    grid[canyon_burn_duration] = 0
-    grid[chaparral_burn_duration] = 0
-    grid[forest_burn_duration] = 0
+
+    # Burning mask
+    burning = (grid == 5) | (grid == 6) | (grid == 7)
+
+    # Consumption
+    fuel[burning] -= 1
+    fuel[fuel < 0] = 0
+
+    # cells that have burned all fuel → turn into empty (0)
+    burn_out = burning & (fuel <= 0)
+    grid[burn_out] = 0
 
     return grid
+
+    # #burnout probabilities
+    # canyon_burn_duration = (grid == 5) & (roll < 0.0833) # canyon: 1/12 = 0.0833
+    # chaparral_burn_duration = (grid == 6) & (roll < 0.0083) # chaparral: 1/120 approx 0.0083
+    # forest_burn_duration = (grid == 7) & (roll < 0.0014) # forest: 1/720 approx 0.0014
+    
+    # # from burning to burn out
+    # grid[canyon_burn_duration] = 0
+    # grid[chaparral_burn_duration] = 0
+    # grid[forest_burn_duration] = 0
+
+    #return grid
 
 def main():
     """ Main function that sets up, runs and saves CA"""
     config = setup(sys.argv[1:])
     grid = Grid2D(config, transition_function)
-    #grid.grid = generate_initial_grid(config.grid_dims)
     timeline = grid.run()
     config.save()
     utils.save(timeline, config.timeline_path)
