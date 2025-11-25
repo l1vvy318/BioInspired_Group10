@@ -15,8 +15,12 @@ sys.path.append(main_dir_loc + 'capyle/guicomponents')
 from capyle.ca import Grid2D, Neighbourhood, randomise2d
 import capyle.utils as utils
 import numpy as np
+global regrowing
+regrowing = False
 global fuel
 fuel = None
+global count
+count = 0
 
 def setup(args):
     global fuel 
@@ -85,7 +89,7 @@ def create_fuel_grid(config):
 
     # power plant
     mask = (grid == 6)
-    fuel[mask] = 1000
+    fuel[mask] = 100
 
     return fuel
 
@@ -128,11 +132,24 @@ def generate_initial_grid(config):
     return config
 
 def transition_function(grid, neighbourstates, neighbourcounts):
-    global fuel
     """Function to apply the transition rules and return the new grid"""
-    
-    # generate random probability number
-    roll = np.random.random(grid.shape)
+    global fuel
+    global regrowing
+    # check if burning has stopped then begin regrowing
+    burning_states = (5,6,7)
+    if not np.any(np.isin(grid, burning_states)):
+        regrowing = True
+
+    # if not regrowing -> burn
+    if regrowing == False:
+        grid = burn(grid, neighbourstates, neighbourcounts)
+    else: # regrow
+        grid = regrow(grid, neighbourstates, neighbourcounts)
+
+    return grid
+
+def burn(grid, neighbourstates, neighbourcounts):
+    roll = np.random.random(grid.shape) # generate random probability number
     
     # check for fire neighbour by adding all burning states
     burning_neighbour_count = neighbourcounts[5] + neighbourcounts[6] + neighbourcounts[7]
@@ -148,7 +165,7 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     grid[ignite_chaparral] = 6
     grid[ignite_forest] = 7
 
-    # Burning mask
+    # # Burning mask
     burning = (grid == 5) | (grid == 6) | (grid == 7)
 
     # Consumption
@@ -161,17 +178,28 @@ def transition_function(grid, neighbourstates, neighbourcounts):
 
     return grid
 
-    # #burnout probabilities
-    # canyon_burn_duration = (grid == 5) & (roll < 0.0833) # canyon: 1/12 = 0.0833
-    # chaparral_burn_duration = (grid == 6) & (roll < 0.0083) # chaparral: 1/120 approx 0.0083
-    # forest_burn_duration = (grid == 7) & (roll < 0.0014) # forest: 1/720 approx 0.0014
-    
-    # # from burning to burn out
-    # grid[canyon_burn_duration] = 0
-    # grid[chaparral_burn_duration] = 0
-    # grid[forest_burn_duration] = 0
+def regrow(grid, neighbourstates, neighbourcounts):
+    global count
+    roll = np.random.random(grid.shape) # generate random probability number
 
-    #return grid
+    if count <= 20:
+        ash_cells = np.argwhere(grid == 0)
+        if len(ash_cells) > 0:  # make sure there is at least one ash cell
+            idx = np.random.choice(len(ash_cells))  # choose a random index
+            r, c = ash_cells[idx]                  # coordinates of the selected cell
+            grid[r, c] = 1  # turn it into canyon
+        count += 1
+
+    # check for a regrowing neighbour
+    has_growing_neighbour = neighbourcounts[1] >= 1
+    
+    # ignition probabilities
+    grow_canyon = (grid == 0) & has_growing_neighbour & (roll < 0.01)  #canyon 90%
+
+    # Set on Fire
+    grid[grow_canyon] = 1
+
+    return grid
 
 def main():
     """ Main function that sets up, runs and saves CA"""
