@@ -35,7 +35,7 @@ def setup(args):
     # this prevents fire from looping from the bottom to the top
     config.wrap = False
     
-    config.states = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    config.states = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
     
     # colours
     config.state_colors = [
@@ -49,7 +49,10 @@ def setup(args):
         (0.44, 0.18, 0.22),# 7: burning forest (dark red)
         (0, 0, 0),         # 8: town (black)
         (0, 0, 0),         # 9: power plant (black)
-        (0, 0, 0)          # 10: incinerator (black)
+        (0, 0, 0),         # 10: incinerator (black)
+        (0.5, 0.5, 0.5),   # 11: canyon ash
+        (0.4, 0.4, 0.4),   # 12: chaparral ash
+        (0.3, 0.3, 0.3)    # 13: forest ash
     ]
 
     config = generate_initial_grid(config)
@@ -69,21 +72,21 @@ def create_fuel_grid(config):
     # canyon
     mask = (grid == 1)
     fuel[mask] = np.clip(
-        np.random.normal(6, 1.2, np.sum(mask)),
+        np.random.normal(6, 1.5, np.sum(mask)),
         1, 12
     )
 
     # chaparral
     mask = (grid == 2)
     fuel[mask] = np.clip(
-        np.random.normal(72, 14.4, np.sum(mask)),
+        np.random.normal(72, 18, np.sum(mask)),
         24, 120
     )
 
     # forest
     mask = (grid == 3)
     fuel[mask] = np.clip(
-        np.random.normal(444, 88.8, np.sum(mask)),
+        np.random.normal(444, 111, np.sum(mask)),
         168, 720
     )
 
@@ -165,8 +168,11 @@ def burn(grid, neighbourstates, neighbourcounts):
     grid[ignite_chaparral] = 6
     grid[ignite_forest] = 7
 
-    # # Burning mask
-    burning = (grid == 5) | (grid == 6) | (grid == 7)
+    # Burning masks
+    burning_canyon = (grid == 5)
+    burning_chaparral = (grid == 6)
+    burning_forest = (grid == 7)
+    burning = burning_canyon | burning_chaparral | burning_forest 
 
     # Consumption
     fuel[burning] -= 1
@@ -174,30 +180,36 @@ def burn(grid, neighbourstates, neighbourcounts):
 
     # cells that have burned all fuel → turn into empty (0)
     burn_out = burning & (fuel <= 0)
-    grid[burn_out] = 0
+
+    grid[burn_out & burning_canyon] = 11
+    grid[burn_out & burning_chaparral] = 12
+    grid[burn_out & burning_forest] = 13
 
     return grid
 
 def regrow(grid, neighbourstates, neighbourcounts):
-    global count
-    roll = np.random.random(grid.shape) # generate random probability number
+    roll = np.random.random(grid.shape)
+    # Mask for ash or empty land
+    ash_mask = np.isin(grid, [0, 11, 12, 13])
 
-    if count <= 20:
-        ash_cells = np.argwhere(grid == 0)
-        if len(ash_cells) > 0:  # make sure there is at least one ash cell
-            idx = np.random.choice(len(ash_cells))  # choose a random index
-            r, c = ash_cells[idx]                  # coordinates of the selected cell
-            grid[r, c] = 1  # turn it into canyon
-        count += 1
-
-    # check for a regrowing neighbour
-    has_growing_neighbour = neighbourcounts[1] >= 1
-    
-    # ignition probabilities
-    grow_canyon = (grid == 0) & has_growing_neighbour & (roll < 0.01)  #canyon 90%
-
-    # Set on Fire
+    # --- 1. Spontaneous sprouting based on ash type ---
+    # Where each type of vegetation used to be
+    canyon_ash = grid == 11
+    chap_ash = grid == 12
+    # Probabilities for spontaneous return
+    sprout_canyon = canyon_ash & (roll < 0.02)
+    sprout_chaparral = chap_ash & (roll < 0.0001)
+    # Apply spontaneous growth
+    grid[sprout_canyon] = 1
+    grid[sprout_chaparral] = 2
+    # --- 2. Spreading from neighbours ---
+    has_canyon_neighbour = neighbourcounts[1] >= 1
+    has_chaparral_neighbour = neighbourcounts[2] >= 1
+    grow_canyon = ash_mask & has_canyon_neighbour & (roll < 0.01)
+    grow_chaparral = ash_mask & has_chaparral_neighbour & (roll < 0.002)
+    # Spread vegetation
     grid[grow_canyon] = 1
+    grid[grow_chaparral] = 2
 
     return grid
 
