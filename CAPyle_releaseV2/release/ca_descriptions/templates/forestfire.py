@@ -83,6 +83,10 @@ def create_fuel_grid(config):
         168, 720
     )
 
+    # power plant
+    mask = (grid == 6)
+    fuel[mask] = 1000
+
     return fuel
 
 def generate_initial_grid(config):
