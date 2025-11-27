@@ -23,7 +23,8 @@ global count
 count = 0
 
 def setup(args):
-    global fuel 
+    global fuel
+
     """Set up the config object used to interact with the GUI"""
     config_path = args[0]
     config = utils.load(config_path)
@@ -124,13 +125,19 @@ def generate_initial_grid(config):
     # config.initial_grid[0, 99] = 6
 
     # extending the dense foreest: long term intervention
+    # around the town
     # config.initial_grid[81:87, 26:33] = 3
     # config.initial_grid[81:93, 33:39] = 3
     # config.initial_grid[81:93, 20:26] = 3
 
-    # dropping water aerially: short term intervention
-    # config.initial_grid[84:86, 15:40] = 4 # 2 x 25 strip of water (wide, thin)
-    # config.initial_grid[81:86, 24:34] = 4 # 5 x 10 strip of water (narrow, thick)
+    # around the incinerator
+    # config.initial_grid[0:10, 90:95] = 3
+    # config.initial_grid[5:10, 95:100] = 3
+
+    # around the power plant
+    # config.initial_grid[0:5, 4:8] = 3
+    # config.initial_grid[2:5, 7:13] = 3
+    # config.initial_grid[0:5, 13:17] = 3
 
     return config
 
@@ -138,6 +145,36 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     """Function to apply the transition rules and return the new grid"""
     global fuel
     global regrowing
+    global count
+
+    # dropping water aerially: short term intervention
+    count += 1 # keeping track of the time to drop water
+    water_drop_time = 80 # testing with 100 time steps
+    
+    if count >= water_drop_time:
+        burning_left_of_forest = grid[68:70, 0:10]
+        burning_right_of_forest = grid[67:70, 50:60]
+
+        # checking if any cells are burning to the left of the forest
+        canyon_burning_left = (burning_left_of_forest == 5)
+        chapparral_burning_left = (burning_left_of_forest == 6)
+        forest_burning_left = (burning_left_of_forest == 7)
+        burning_cells_left = (canyon_burning_left | chapparral_burning_left | forest_burning_left)  
+        
+        # checking if any cells are burning to the right of the forest
+        canyon_burning_right = (burning_right_of_forest == 5)
+        chapparral_burning_right = (burning_right_of_forest == 6)
+        forest_burning_right = (burning_right_of_forest == 7)
+        burning_cells_right = (canyon_burning_right | chapparral_burning_right | forest_burning_right)
+
+        # set the states of burning cells in target area to water
+        burning_left_of_forest[burning_cells_left] = 4 
+        burning_right_of_forest[burning_cells_right] = 4
+
+        # updating the grid with the new states in selected positions
+        grid[68:70, 0:10] = burning_left_of_forest
+        grid[67:70, 50:60] = burning_right_of_forest
+
     # check if burning has stopped then begin regrowing
     burning_states = (5,6,7)
     if not np.any(np.isin(grid, burning_states)):
