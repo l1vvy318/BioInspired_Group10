@@ -56,17 +56,17 @@ From here, repeat the process above in the previous chapter, Running the file.
 
 ## Long-term Intervention Implementation
 To simulate the long-term intervention in the model, uncomment the following lines:
-1. Navigate to the funcion `generate_initial_grid(config):`
+1. Navigate to the function `generate_initial_grid(config):`
 
 2. Scroll to the comment section labelled `extending the dense foreest: long term intervention`
-- Uncomment all sections with labels:
+- Uncomment all code under the labels:
   - `around the town`
   - `around the incinerator`
   - `around the power plant`
 
 From here, repeat the process above in the previous chapter, Running the file.
 
-3. Likewise, to test the model without the intervention, comment the same sections.
+3. Likewise, to test the model without the intervention, comment the same sections of code.
 
 ## Code Explanations
 Our CA model uses 14 distinct states to represent the map:
