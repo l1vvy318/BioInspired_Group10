@@ -43,6 +43,31 @@ To simulate wind in the model the following lines must be commented and uncommen
 
 From here, repeat the process above in the previous chapter, Running the file.
 
+## Short-term Intervention Implementation
+To simulate the short-term intervention in the model, uncomment the following lines:
+1. Navigate to the function `transition_function(grid, neighbourstates, neighbourcounts):`
+
+2. Scroll to the comment section labelled `dropping water aerially: short term intervention`
+- Uncomment this section (lines 154-179)
+
+From here, repeat the process above in the previous chapter, Running the file.
+
+3. Likewise, to test the model without the intervention, comment the same section.
+
+## Long-term Intervention Implementation
+To simulate the long-term intervention in the model, uncomment the following lines:
+1. Navigate to the funcion `generate_initial_grid(config):`
+
+2. Scroll to the comment section labelled `extending the dense foreest: long term intervention`
+- Uncomment all sections with labels:
+  - `around the town`
+  - `around the incinerator`
+  - `around the power plant`
+
+From here, repeat the process above in the previous chapter, Running the file.
+
+3. Likewise, to test the model without the intervention, comment the same sections.
+
 ## Code Explanations
 Our CA model uses 14 distinct states to represent the map:
 - State 0: Ash (Burnt out land)
