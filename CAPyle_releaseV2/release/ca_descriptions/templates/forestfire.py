@@ -206,7 +206,7 @@ def burn(grid, neighbourstates, neighbourcounts):
 
     # # Wind probability - ALSO UNCOMMENT BELOW TO ACTIVATE CA MODEL WITH WIND
     # wind_factor = 0.2
-    # wind_factor += 0.4 * burning_from_south      # strong boost from downwind
+    # wind_factor += 0.6 * burning_from_south      # strong boost from downwind
     # wind_factor += 0.05 * burning_from_sides       # mild boost from sides/boundaries
     # wind_factor -= 0.3 * burning_from_north       # resist spread from upwind
     # wind_factor = np.clip(wind_factor, 0.7, 1.6)   # keep it gentle and bounded
