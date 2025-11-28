@@ -118,13 +118,15 @@ def generate_initial_grid(config):
     config.initial_grid[0, 10] = 9
     # proposed incinerator
     config.initial_grid[0, 99] = 10
-    # start the fire at the power plant
+
+    # UNCOMMENT THE LINE BELOW to start the fire at the power plant
     config.initial_grid[0, 10] = 6
 
-    # start the fire at the incinerator
+    # UNCOMMENT THE LINE BELOW to start the fire at the incinerator
     # config.initial_grid[0, 99] = 6
 
     # extending the dense foreest: long term intervention
+    # UNCOMMENT THE LINES UNDER EACH SECTION TO TEST THE DENSE FOREST
     # around the town
     # config.initial_grid[81:87, 26:33] = 3
     # config.initial_grid[81:93, 33:39] = 3
@@ -147,6 +149,7 @@ def transition_function(grid, neighbourstates, neighbourcounts):
     global regrowing
     global count
 
+    # TO TEST THE CA MODEL WITHOUT SHORT TERM INTERVENTION COMMENT LINES 154-179
     # dropping water aerially: short term intervention
     count += 1 # keeping track of the time to drop water
     water_drop_time = 80 # testing with 100 time steps
