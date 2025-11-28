@@ -195,10 +195,32 @@ def burn(grid, neighbourstates, neighbourcounts):
     burning_neighbour_count = neighbourcounts[5] + neighbourcounts[6] + neighbourcounts[7]
     has_burning_neighbour = burning_neighbour_count >= 1
     
-    # ignition probabilities
+
+    # ##UNCOMMENT BELOW TO ACTIVATE CA MODEL WITH WIND
+    # # wind implementation
+    # # values for wind direction: 0=NW, 1=N, 2=NE, 3=W, 4=E, 5=SW, 6=S, 7=SE
+    # burning_from_north  = neighbourstates[1]   # upwind  – resists spread of fire
+    # burning_from_south  = neighbourstates[6]   # downwind – helps spread of fire
+    # burning_from_sides  = neighbourstates[0] + neighbourstates[2] + neighbourstates[3] + \
+    #                       neighbourstates[4] + neighbourstates[5] + neighbourstates[7]
+
+    # # Wind probability - ALSO UNCOMMENT BELOW TO ACTIVATE CA MODEL WITH WIND
+    # wind_factor = 0.2
+    # wind_factor += 0.4 * burning_from_south      # strong boost from downwind
+    # wind_factor += 0.05 * burning_from_sides       # mild boost from sides/boundaries
+    # wind_factor -= 0.3 * burning_from_north       # resist spread from upwind
+    # wind_factor = np.clip(wind_factor, 0.7, 1.6)   # keep it gentle and bounded
+
+    # ignition probabilities 
     ignite_canyon = (grid == 1) & has_burning_neighbour & (roll < 0.9)  #canyon 90%
     ignite_chaparral = (grid == 2) & has_burning_neighbour & (roll < 0.4)  #chaparral %40
     ignite_forest = (grid == 3) & has_burning_neighbour & (roll < 0.1)  #forest %10
+
+    # ##UNCOMMENT BELOW TO ACTIVATE CA Model with wind and COMMENT 3 LINES ABOVE (ignition probabilities)
+    # # ignition probabilities including wind factor
+    # ignite_canyon = (grid == 1) & has_burning_neighbour & (roll < 0.9 * wind_factor)  #canyon 90%
+    # ignite_chaparral = (grid == 2) & has_burning_neighbour & (roll < 0.4 * wind_factor)  #chaparral %40
+    # ignite_forest = (grid == 3) & has_burning_neighbour & (roll < 0.1 * wind_factor)  #forest %10
 
     # Set on Fire
     grid[ignite_canyon] = 5
