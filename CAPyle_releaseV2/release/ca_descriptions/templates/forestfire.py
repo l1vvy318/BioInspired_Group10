@@ -125,7 +125,7 @@ def generate_initial_grid(config):
     # UNCOMMENT THE LINE BELOW to start the fire at the incinerator
     # config.initial_grid[0, 99] = 6
 
-    # extending the dense foreest: long term intervention
+    # extending the dense forest: long term intervention
     # UNCOMMENT THE LINES UNDER EACH SECTION TO TEST THE DENSE FOREST
     # around the town
     # config.initial_grid[81:87, 26:33] = 3
