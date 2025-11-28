@@ -24,8 +24,27 @@ Select option 3.
 
 3. Click on `Simulation`, located at the top-left corner of the window and press `Run Configuration`.
 
+
+## Wind Implementation
+To simulate wind in the model the following lines must be commented and uncommented.
+1. Navigate to the function `def burn(grid, neighbourstates, neighbourcounts):`
+
+2. Scroll to the comment section labelled `wind implementation`
+-  Uncomment this section
+
+3. Scroll to the comment section labelled `wind probability`
+- Uncomment this section
+
+4. Scroll to the comment section labelled `ignition probabilities`
+- Comment out this section
+
+5. Scroll to the comment section labelled `ignition probabilities including wind factor`
+- Uncomment this section
+
+From here, repeat the process above in the previous chapter, Running the file.
+
 ## Code Explanations
-Our CA model uses 11 distinct states to represent the map:
+Our CA model uses 14 distinct states to represent the map:
 - State 0: Ash (Burnt out land)
 - State 1: Canyon
 - State 2: Chaparral
@@ -37,6 +56,9 @@ Our CA model uses 11 distinct states to represent the map:
 - State 8: Town
 - State 9: Power plant
 - State 10: Incinerator
+- State 11: Canyon ash
+- State 12: Chaparal ash
+- State 13: Forest ash
 
 We modelled the burning duration for each type of terrain. 
 - Canyon (burns for several hours): takes 12 time steps to turn into ash (P = 1/12)
