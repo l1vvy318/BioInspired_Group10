@@ -26,7 +26,11 @@ Select option 3.
 
 
 ## Wind Implementation
-To simulate wind in the model the following lines must be commented and uncommented.
+To simulate wind in the model the following lines must be commented and uncommented. 
+The following command can be used to comment/uncomment blocks of code in Windows:
+```sh
+Ctrl + /
+```
 1. Navigate to the function `def burn(grid, neighbourstates, neighbourcounts):`
 
 2. Scroll to the comment section labelled `wind implementation`
